@@ -49,6 +49,17 @@ Ext.define('Ext.jsv.DeletableList', {
 		// set store
 		this.addStore = this.getStore();
 		
+		// fix, 2012. 04. 27.
+		if(!this.addStore.isLoaded()) {
+			this.addStore.load();
+		}
+		
+		// fix, 2012. 04. 27.
+		this.setScrollable({
+			direction    : 'vertical',
+			directionLock: true
+		});
+		
 		// event listeners
 		this.on('itemswipe', this.onItemSwipeList, this);
 		this.on('deleteitem', this.onDeleteItemList, this);
