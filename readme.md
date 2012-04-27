@@ -1,7 +1,8 @@
 Lastest Change
 --------------
 
-* First Release for Sencha Touch 2 (2012. 04. 27.)
+* v0.1.1 - Set option about 'directionLock: true'
+* v0.1   - First Release for Sencha Touch 2 (2012. 04. 27.)
 
 License
 -------
