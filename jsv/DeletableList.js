@@ -108,15 +108,20 @@ Ext.define('Ext.jsv.DeletableList', {
 	},
 	
 	toogleDel: function(newDelBtn) {
+		// first time or this.oldDelBtn = null;
 		if(!this.oldDelBtn && this.oldDelBtn !== newDelBtn) {
 			newDelBtn.show();
 			this.oldDelBtn = newDelBtn;
 		} else {
+			// if you swipe again
 			if(this.oldDelBtn === newDelBtn) {
 				newDelBtn.hide();
 				
 				this.oldDelBtn = null;
-			} else {
+			} 
+			// old button is hide
+			// new buttin is show
+			else {
 				newDelBtn.show();
 				this.oldDelBtn.hide();
 				
