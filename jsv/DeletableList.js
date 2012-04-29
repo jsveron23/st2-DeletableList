@@ -1,4 +1,4 @@
-/**
+/*
  *
  * @class    Ext.jsv.DeletableList
  * @author   Ip Myung, Jin
@@ -22,9 +22,6 @@
  *				extend: 'Ext.ux.DeletableList',
  *				
  *				config: {
- *					// localstage, sessionstorage ... => true
- *					// ajax, jsonp => false
- *					storage: true or fase, 
  *					itemTpl: Ext.create('Ext.XTemplate',
  *						.... list ....
  *						'<p class="delete" style="position: absolute; right: 5px; top: 20px; display: none;">',
@@ -32,9 +29,14 @@
  *						'</p>'
  *					),						// like that
  *					store: 'MyStore'		// require
- *					deleteItemCls: 'p.delete',
- *					deleteItemTitle: 'Delete Item',
- *					deleteItemText: 'Are you sure?'
+ *
+ *					deletable: {
+ *						storage: true,		// ajax, jsonp => false || localstorage, sessionstorage ... => true
+ *						message: true,
+ *						cls    : 'p.delete',
+ *						title  : 'Delete Item',
+ *						text   : 'Are you sure?'
+ *					}
  *				}
  *			});
  *
@@ -46,15 +48,28 @@ Ext.define('Ext.jsv.DeletableList', {
 	initialize: function() {
 		this.callParent();
 		
-		// set store
-		this.addStore = this.getStore();
+		// store
+		if(this.getStore()) {
+			this.addStore = this.getStore();
+		} else {
+			this.warnMsg('Deletable Store', 'Please set store. Or it doesn\'t work!');
+		}
+				
+		// setting of plugin
+		if(this.getDeletable()) {
+			this.setting = this.getDeletable();
+
+			Ext.applyIf(this.setting, {
+				storage: this.setting.storage || false,
+				message: this.setting.message || false,
+				cls    : this.setting.cls     || '.delete',
+				title  : this.setting.title   || 'Delete Item',
+				text   : this.setting.text    || 'Are you sure?'
+			});
+		} else {
+			this.warnMsg('Deletable Store', 'Please set config for deletable list. Or it doesn\'t work!');
+		}
 		
-		// // fix, 2012. 04. 27.
-		// if(!this.addStore.isLoaded()) {
-		// 	this.addStore.load();
-		// }
-		
-		// fix, 2012. 04. 27.
 		this.setScrollable({
 			direction    : 'vertical',
 			directionLock: true
@@ -67,44 +82,54 @@ Ext.define('Ext.jsv.DeletableList', {
 	
 	onItemSwipeList: function(list, idx, target) {
 		var me  = this,
-			cls = this.getDeleteItemCls();
-			newDelBtn = target.down(cls);
+			cls = this.setting.cls;
+			del = target.down(cls);
 		
 		// animate
-		Ext.Anim.run(newDelBtn, 'fade', {
+		Ext.Anim.run(del, 'fade', {
 			out: false,
 			duration: 200
 		});
 		 
-		newDelBtn.on('tap', function() {
-			me.fireEvent('deleteitem', me, newDelBtn, idx, target);
+		// event
+		del.on('tap', function() {
+			me.fireEvent('deleteitem', me, del, idx, target);
 		}, list, {
 			single: true
 		});
 		
-		this.toogleDel(newDelBtn);
+		// show or hide
+		this.toogleDel(del);
 	},
 		
 	onDeleteItemList: function(list, del, idx, target) {
-		var store   = this.addStore,
-			// true or false
-			storage = this.getStorage(),
-			title   = this.getDeleteItemTitle(),
-			text    = this.getDeleteItemText();
-		
-		Ext.Msg.confirm(title, text, function(buttonId) {
-			if(buttonId === 'yes') {				
-				store.removeAt(idx);
-				
-				if(storage) {
-					store.sync();
-				}
-			}
+		var message = this.setting.message,
+			title   = this.setting.title,
+			text    = this.setting.text;
 			
-			if(del) {
-				del.hide();
+		this.del = del;
+		this.idx = idx;	
+		
+		if(message) {			
+			Ext.Msg.confirm(title, text, this.doDeleteItem, this);
+		} else {
+			this.doDeleteItem('yes', del, idx);
+		}
+	},
+	
+	doDeleteItem: function(buttonId) {			
+		this.del.hide();
+		
+		if(buttonId === 'yes') {
+			var store   = this.addStore,
+				storage = this.setting.storage;
+							
+			store.removeAt(this.idx);
+
+			if(storage) {
+				store.sync();
 			}
-		});
+		}
 	},
 	
 	toogleDel: function(newDelBtn) {
@@ -129,4 +154,8 @@ Ext.define('Ext.jsv.DeletableList', {
 			}
 		}
 	},
+	
+	warnMsg: function(title, text) {
+		Ext.Msg.alert(title, text, Ext.emptyFn);
+	}
 });
