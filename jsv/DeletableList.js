@@ -45,6 +45,13 @@
 Ext.define('Ext.jsv.DeletableList', {
 	extend: 'Ext.List',
 	
+	config: {
+		deletable : null,
+		scrollable: {
+			directionLock: true
+		}
+	},
+	
 	initialize: function() {
 		this.callParent();
 		
@@ -69,11 +76,6 @@ Ext.define('Ext.jsv.DeletableList', {
 		} else {
 			this.warnMsg('Deletable Store', 'Please set config for deletable list. Or it doesn\'t work!');
 		}
-		
-		this.setScrollable({
-			direction    : 'vertical',
-			directionLock: true
-		});
 		
 		// event listeners
 		this.on('itemswipe', this.onItemSwipeList, this);
