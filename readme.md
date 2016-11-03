@@ -9,4 +9,4 @@ Lastest Change
 License
 -------
 
-* GPL Version 3
+* MIT
